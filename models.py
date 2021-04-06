@@ -1,7 +1,13 @@
 from decimal import Decimal
 
 from pony.orm import Database, Required, PrimaryKey, Optional, Set
-from settings import DB_CONFIG
+
+
+try:
+    from settings import DB_CONFIG
+except:
+    exit("cannot open settings.py")
+
 
 db = Database()
 db.bind(**DB_CONFIG)
@@ -45,10 +51,6 @@ class Confluence(db.Entity):
     """Table confluence building and location"""
     id_flat = Required(Flats, reverse='confluence_flat')
     id_location = Required(Location, reverse='confluence_location')
-
-
-
-
 
 
 db.generate_mapping(create_tables=True)
