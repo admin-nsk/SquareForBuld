@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
+
 import os
-import csv
 import pandas as pd
 from models import db
 from logger_config import get_logger
@@ -10,110 +10,61 @@ log = get_logger('import_logger')
 log.setLevel('DEBUG')
 
 
-class Import_File:
+class ImportFile:
 
-    def __init__(self, input_file):
-        '''python 3.9
+    def __init__(self, input_file, table_name):
+        """python 3.9
         Class for split one file to many
-        :param input_xls: File for splitting
-        '''
-        #TODO rename input_xls
-        self.input_xls = input_file
+        :param input_file: File for import to DB
+        """
+        self.input_file = input_file
         self.all_data_frame = pd.DataFrame()
         self.column_names = ''
         self.sheet_names = ''
+        self.table_name = table_name
 
     def check_extension(self):
-      __file_extension = os.path.splitext(self.input_xls)[1]
-      if __file_extension == '.xls' or __file_extension == '.xlsx':
-        self.import_xls()
-      elif __file_extension == '.csv':
-        self.import_csv()
-      else:
-        log.error('Wrong file extension')
-        #TODO Add Exception
-        #rise.Exception('Wrong file extension')
-    
-    def import_xls(self):
-       try:
-            with pd.ExcelFile(self.input_xls) as source_xls:
-                self.sheet_names = source_xls.sheet_names
-                return self.sheet_names
-        except:
-            log.debug('Don\'t read file')
-            return 'Don\'t read file'
+        log.debug('check_extension')
+        _file_extension = os.path.splitext(self.input_file)[1]
+        if _file_extension == '.xls' or _file_extension == '.xlsx':
+            self.import_xls(self.input_file)
+        elif _file_extension == '.csv':
+            self.import_csv(self.input_file)
+        else:
+            log.error('Wrong file extension')
+            raise TypeError('Wrong file extension')
 
-    def import_csv(self):
-      self.all_data_frame = pandas.read_csv(self.input_xls)
-      self.all_data_frame.to_sql(table_name, db, if_exists='append', index=False)
-
-
-    def read_sheets(self):
-        '''
-        Open Excel file and read sheet names
-        :return: list sheet names
-        '''
+    def import_xls(self, file):
         try:
-            with pd.ExcelFile(self.input_xls) as source_xls:
-                self.sheet_names = source_xls.sheet_names
-                return self.sheet_names
-        except:
-            log.debug('Don\'t read file')
+            log.debug('Try read xls')
+            self.all_data_frame = pd.read_excel(file, encoding='cp1251')
+            print(self.all_data_frame)
+            log.debug('write to db')
+            self.all_data_frame.to_sql(self.table_name, db, if_exists='append', index=False)
+        except Exception as ex:
+            log.debug(f'Don\'t import file: {ex}')
+            return 'Don\'t import file'
+
+    def import_csv(self, file):
+        try:
+            log.debug('Try read csv')
+            self.all_data_frame = pd.read_csv(self.input_file, encoding='cp1251', delimiter=";")
+            print(self.all_data_frame)
+            log.debug('write to db')
+            self.all_data_frame.to_sql(self.table_name, db, if_exists='append', index=False)
+        except Exception as ex:
+            log.debug(f'Don\'t import file: {ex}')
             return 'Don\'t read file'
 
-    def read_data(self, selected_sheet):
-        '''
-        Read data frame on file
-        :param selected_sheet:
-        :return: list column_names
-        '''
-        with pd.ExcelFile(self.input_xls) as source_xls:
-            self.all_data_frame = pd.read_excel(source_xls, sheet_name=selected_sheet)
-            self.column_names = self.all_data_frame.columns
-            return self.column_names
+    def run(self):
+        log.debug('Run')
+        print('run')
+        self.check_extension()
 
-    def split_file(self, selected_sheet, selected_column, dir_path):
-        '''
-        Split data to many file by selected column
-        :param dir_path: destination directory
-        :param selected_sheet:
-        :param selected_column:
-        :return: None
-        '''
-        log.debug('Start split_file')
-        unique_data_on_column = set(self.all_data_frame[selected_column])
-        for item in unique_data_on_column:
-            filtered_data = self.all_data_frame[(self.all_data_frame[selected_column] == item)]
-            out_file = item.replace('/', '_') + '.xlsx'
-            path = os.path.join(dir_path, out_file)
-            path = os.path.normpath(path)
-            try:
-                log.debug('Write frame to file')
-                self.write_xls(path, filtered_data, selected_sheet)
 
-            except:
-                log.debug('Don\'t write frame to file')
-                return False
-        return True
-
-    def write_xls(self, filename, frame, sheet_name):
-        '''
-        Write data frame in file
-        :param filename:
-        :param frame:
-        :param sheet_name:
-        :return:
-        '''
-        out_data = pd.DataFrame()
-        out_data = out_data.append(frame, ignore_index=True)
-        writer = pd.ExcelWriter(filename)
-        out_data.to_excel(writer, sheet_name=sheet_name)
-        writer.save()
-
+path = 'input_files/vtor_case2.csv'
 
 if __name__ == '__main__':
-    slxl = SliceXLS(path)
-    slxl.read_data(selected_sheet='Телеметрия')
-    slxl.split_file(selected_sheet='Телеметрия', selected_column='Адрес')
-
+    write_to_db = ImportFile(path, 'flats')
+    write_to_db.run()
 

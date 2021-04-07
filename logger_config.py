@@ -12,14 +12,20 @@ LOG_FILE = "info.log"
 
 
 def get_logger(logger_name):
-    __log = logging.getLogger(logger_name)
-    __log.addHandler(_configure_file_logging())
-    __log.addHandler(_configure_stream_logging())
-    return __log
+    log = logging.getLogger(logger_name)
+    log.addHandler(_configure_file_logging())
+    log.addHandler(_configure_stream_logging())
+    return log
 
 
 def _configure_file_logging():
     file_handler = logging.FileHandler(filename=LOG_FILE, encoding="utf8")
     file_handler.setFormatter(FILE_FORMATER)
-    file_handler.setLevel(logging.DEBUG)
+    # file_handler.setLevel(logging.DEBUG)
     return file_handler
+
+def _configure_stream_logging():
+    stream_handler = logging.StreamHandler()
+    stream_handler.setFormatter(CONSOLE_FORMATER)
+    # stream_handler.setLevel(logging.INFO)
+    return stream_handler

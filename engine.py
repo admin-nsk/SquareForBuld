@@ -1,4 +1,4 @@
-from models import Location, Flats, Confluence
+from models import Locations, Flats, Confluences
 
 from logger_config import get_logger
 
