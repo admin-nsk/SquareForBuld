@@ -1,5 +1,9 @@
+#!/usr/bin/python3
+# -*- coding: utf-8 -*-
+import os
 import csv
 import pandas as pd
+from models import db
 from logger_config import get_logger
 
 log = get_logger('import_logger')
@@ -8,15 +12,41 @@ log.setLevel('DEBUG')
 
 class Import_File:
 
-    def __init__(self, input_xls):
+    def __init__(self, input_file):
         '''python 3.9
         Class for split one file to many
         :param input_xls: File for splitting
         '''
-        self.input_xls = input_xls
+        #TODO rename input_xls
+        self.input_xls = input_file
         self.all_data_frame = pd.DataFrame()
         self.column_names = ''
         self.sheet_names = ''
+
+    def check_extension(self):
+      __file_extension = os.path.splitext(self.input_xls)[1]
+      if __file_extension == '.xls' or __file_extension == '.xlsx':
+        self.import_xls()
+      elif __file_extension == '.csv':
+        self.import_csv()
+      else:
+        log.error('Wrong file extension')
+        #TODO Add Exception
+        #rise.Exception('Wrong file extension')
+    
+    def import_xls(self):
+       try:
+            with pd.ExcelFile(self.input_xls) as source_xls:
+                self.sheet_names = source_xls.sheet_names
+                return self.sheet_names
+        except:
+            log.debug('Don\'t read file')
+            return 'Don\'t read file'
+
+    def import_csv(self):
+      self.all_data_frame = pandas.read_csv(self.input_xls)
+      self.all_data_frame.to_sql(table_name, db, if_exists='append', index=False)
+
 
     def read_sheets(self):
         '''
