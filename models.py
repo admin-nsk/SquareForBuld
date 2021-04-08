@@ -18,6 +18,8 @@ class Locations(Base):
     address = Column(String)
     area = Column(Float)
     having_houses = Column(ForeignKey('having_houses.id'))
+    count_floor = Column(Integer)
+    count_offer = Column(Integer)
 
 
 class Flats(Base):
@@ -49,6 +51,14 @@ class Confluences(Base):
     id = Column(Integer, primary_key=True)
     id_flat = Column(ForeignKey('flats.id'))
     id_location = Column(ForeignKey('locations.id'))
+
+class Building(Base):
+    """Table Building"""
+    __tablename__ = 'confluences'
+    id = Column(Integer, primary_key=True)
+    address = Column(String)
+    count_floor = Column(Integer)
+    count_offer = Column(Integer)
 
 
 Base.metadata.create_all(db)
