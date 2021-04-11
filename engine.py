@@ -81,6 +81,7 @@ def calculate_distance(coordinates):
 
     return R * result
 
+
 def add_building():
     session_db = Session()
     flats = session_db.query(Flat).all()
@@ -121,8 +122,18 @@ def add_building_in_flat():
     session_db.commit()
 
 
+def count_offer_in_location():
+    session_db = Session()
+    buildings = session_db.query(Building).all()
+    for building in buildings:
+        count_flats = session_db.query(Flat).filter(Flat.building == building.id).count()
+        building.count_offer = count_flats
+    session_db.commit()
+
+
 if __name__ == '__main__':
-    find_house_on_location()
+    count_offer_in_location()
+    # find_house_on_location()
     # add_building()
     # add_building_in_flat()
 
