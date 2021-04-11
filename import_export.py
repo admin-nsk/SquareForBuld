@@ -37,7 +37,7 @@ class ImportFile:
     def import_xls(self, file):
         try:
             log.debug('Try read xls')
-            self.all_data_frame = pd.read_excel(file, encoding='cp1251')
+            self.all_data_frame = pd.read_excel(self.input_file)
             print(self.all_data_frame)
             log.debug('write to db')
             self.all_data_frame.to_sql(self.table_name, db, if_exists='append', index=False)

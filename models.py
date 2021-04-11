@@ -3,11 +3,11 @@ from sqlalchemy import create_engine, Column, Float, \
 from sqlalchemy.orm import declarative_base
 
 
-db = create_engine('sqlite:///locationForBuild.db', echo=True)
+db = create_engine('sqlite:///locationForBuild.db', echo=False)
 Base = declarative_base()
 
 
-class Locations(Base):
+class Location(Base):
     """Table squares"""
     
     __tablename__ = 'locations'
@@ -18,11 +18,9 @@ class Locations(Base):
     address = Column(String)
     area = Column(Float)
     having_houses = Column(ForeignKey('having_houses.id'))
-    count_floor = Column(Integer)
-    count_offer = Column(Integer)
 
 
-class Flats(Base):
+class Flat(Base):
     """Table flats"""
 
     __tablename__ = 'flats'
@@ -36,6 +34,7 @@ class Flats(Base):
     type_house = Column(String)
     number_of_room = Column(Integer)
     street = Column(String)
+    building = Column(ForeignKey('buildings.id'))
 
 
 class Having_Houses(Base):
@@ -45,20 +44,26 @@ class Having_Houses(Base):
     name = Column(String, nullable=False)
 
 
-class Confluences(Base):
+class Confluence(Base):
     """Table confluence building and location"""
     __tablename__ = 'confluences'
     id = Column(Integer, primary_key=True)
-    id_flat = Column(ForeignKey('flats.id'))
-    id_location = Column(ForeignKey('locations.id'))
+    flat = Column(ForeignKey('flats.id'))
+    location = Column(ForeignKey('locations.id'))
+
 
 class Building(Base):
     """Table Building"""
-    __tablename__ = 'confluences'
+    __tablename__ = 'buildings'
     id = Column(Integer, primary_key=True)
     address = Column(String)
+    longitude = Column(Float)
+    latitude = Column(Float)
     count_floor = Column(Integer)
     count_offer = Column(Integer)
+    year_build = Column(Integer)
+    location = Column(ForeignKey('locations.id'))
 
 
-Base.metadata.create_all(db)
+if __name__ == '__main__':
+    Base.metadata.create_all(db)
